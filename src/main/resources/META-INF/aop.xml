@@ -1,0 +1,11 @@
+<aspectj>
+    <weaver options="-verbose -showWeaveInfo">
+        <include within="**.LoggingAspect"/>
+        <include within="com.budwhite.studying.aspect.logging.service..*"/>
+        <include within="com.budwhite.studying.aspect.logging.Application"/>
+    </weaver>
+    <aspects>
+        <!-- Aspects -->
+        <aspect name="**.LoggingAspect"/>
+    </aspects>
+</aspectj>
