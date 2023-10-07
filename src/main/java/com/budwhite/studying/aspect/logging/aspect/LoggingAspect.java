@@ -16,7 +16,7 @@ import static java.lang.System.currentTimeMillis;
 public class LoggingAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
-    @Around("call(* com.budwhite.studying.aspect.logging.service..*(..))")
+    @Around("execution(* com.budwhite.studying.aspect.logging.service..*(..))")
     public Object whatever(ProceedingJoinPoint thisJoinPoint) throws Throwable {
         System.out.println("UAZZZZ");
         logger.warn("{} begins, args are [{}]",
