@@ -1,6 +1,8 @@
 package com.budwhite.studying.aspect.logging.aspect;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,15 +17,17 @@ import static java.lang.System.currentTimeMillis;
 @Aspect
 public class LoggingAspect {
 
+    private final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
     @Around("call(* com.budwhite.studying.aspect.logging.service..*(..))")
-    public Object whatever(ProceedingJoinPoint thisJoinPoint) throws Throwable {
+    public Object logBeforeAndAfterExecution(ProceedingJoinPoint thisJoinPoint) throws Throwable {
         if(logger.isDebugEnabled()) {
             if(logger.isTraceEnabled()) {
                 logger.trace("{} begins, args are: [{}]",
                         thisJoinPoint.getSignature().getName(),
                         Arrays.stream(thisJoinPoint.getArgs())
-                                .map(Object::toString)
+                                .map(this::representObject)
                                 .collect(Collectors.joining(",")));
             }
             else {
@@ -37,7 +41,7 @@ public class LoggingAspect {
                 logger.trace("{} ends, execution time {} ms, output is: {}",
                         thisJoinPoint.getSignature().getName(),
                         currentTimeMillis()-startTime,
-                        result!=null ? result : ""
+                        result!=null ? representObject(result) : ""
                 );
             }
             else {
@@ -45,5 +49,25 @@ public class LoggingAspect {
             }
         }
         return result;
+    }
+
+    private String representObject(Object object) {
+        if(object==null) {
+            return "null";
+        }
+        else if(object.getClass().isPrimitive()) {
+            return object.toString();
+        }
+        else {
+            try {
+                return gson.toJson(object);
+            }
+            catch (Exception e) {
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Could not represent object {}", object, e);
+                }
+                return object.toString();
+            }
+        }
     }
 }
